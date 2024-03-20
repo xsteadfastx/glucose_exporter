@@ -1,0 +1,13 @@
+linters:
+  enable-all: true
+  disable:
+    - depguard
+    - exhaustivestruct
+    - exhaustruct
+    - gomnd
+    - paralleltest
+    - tagliatelle
+    - varnamelen
+run:
+  skip-dirs:
+    - httpslog/internal/mutil/*

@@ -1,0 +1,24 @@
+# dario.cat/mergo v1.0.0
+## explicit; go 1.13
+dario.cat/mergo
+# github.com/VictoriaMetrics/metrics v1.33.0
+## explicit; go 1.17
+github.com/VictoriaMetrics/metrics
+# github.com/caarlos0/env/v10 v10.0.0
+## explicit; go 1.17
+github.com/caarlos0/env/v10
+# github.com/lmittmann/tint v1.0.4
+## explicit; go 1.21
+github.com/lmittmann/tint
+# github.com/matryer/is v1.4.1
+## explicit; go 1.14
+github.com/matryer/is
+# github.com/valyala/fastrand v1.1.0
+## explicit
+github.com/valyala/fastrand
+# github.com/valyala/histogram v1.2.0
+## explicit; go 1.12
+github.com/valyala/histogram
+# golang.org/x/sys v0.15.0
+## explicit; go 1.18
+golang.org/x/sys/windows
