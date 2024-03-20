@@ -1,9 +1,11 @@
-name: Earthly +build
+name: Earthly snapshot
 on:
   push:
-    branches: [main]
+    branches:
+      - '*'
   pull_request:
-    branches: [main]
+    branches:
+      - '*'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,5 +15,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download latest earthly
         run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.8.6/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
-      - name: Run build
-        run: earthly --ci --push +ci
+      - name: Run earthly
+        run: earthly --ci +ci --SNAPSHOT=true

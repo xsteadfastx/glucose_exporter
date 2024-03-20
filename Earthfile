@@ -22,8 +22,14 @@ code:
 	SAVE ARTIFACT . code
 
 ci:
+	FROM +deps
+	ARG SNAPSHOT=true
+	ARG GITHUB_TOKEN
 	BUILD +test
 	BUILD +lint
+	COPY (+goreleaser/dist/metadata.json --SNAPSHOT=$SNAPSHOT --GITHUB_TOKEN=$GITHUB_TOKEN) /tmp/metadata.json
+	ARG DOCKER_TAG=$(cat /tmp/metadata.json|jq -r .version)
+	BUILD +docker --DOCKER_TAG=$DOCKER_TAG
 
 test:
 	COPY +code/code ./
@@ -42,9 +48,31 @@ deps:
 	FROM +base
 	RUN (cd /tmp; go install github.com/golangci/golangci-lint/cmd/golangci-lint@$GOLANGCILINT_VERSION)
 	RUN (cd /tmp; go install github.com/goreleaser/goreleaser@$GORELEASER_VERSION)
+	RUN apk add --no-cache \
+		git \
+		jq
 
 lint:
 	FROM +deps
 	COPY +code/code ./
 	COPY .golangci.yml .golangci.yml
 	RUN golangci-lint run
+
+goreleaser:
+	FROM +deps
+	ARG SNAPSHOT=true
+	ARG GITHUB_TOKEN
+	IF [ "$SNAPSHOT" = "true" ]
+		ARG CMD="release --snapshot --clean"
+	ELSE
+		ARG CMD="release --clean"
+	END
+	COPY . .
+	RUN goreleaser $CMD
+	SAVE ARTIFACT dist dist
+
+docker:
+	FROM scratch
+	ARG DOCKER_TAG
+	COPY +goreleaser/dist/glucose_exporter_linux_amd64_v1/glucose_exporter /bin/glucose_exporter
+	SAVE IMAGE --push ghcr.io/xsteadfastx/glucose_exporter:$DOCKER_TAG
