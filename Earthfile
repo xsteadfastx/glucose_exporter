@@ -1,5 +1,5 @@
 VERSION 0.7
-ARG --global GO_VERSION=1.22.0
+ARG --global GO_VERSION=1.22.1
 ARG --global GOLANGCILINT_VERSION=v1.54.2
 ARG --global GORELEASER_VERSION=v1.24.0
 FROM golang:$GO_VERSION-alpine3.18
@@ -10,12 +10,14 @@ SAVE_CODE:
 	SAVE ARTIFACT go.mod AS LOCAL go.mod
 	SAVE ARTIFACT go.sum AS LOCAL go.sum
 	SAVE ARTIFACT api AS LOCAL api
+	SAVE ARTIFACT cmd AS LOCAL cmd
 	SAVE ARTIFACT httpslog AS LOCAL httpslog
 	SAVE ARTIFACT internal AS LOCAL internal
 
 code:
 	COPY go.mod go.sum ./
 	COPY --dir api ./
+	COPY --dir cmd ./
 	COPY --dir httpslog ./
 	COPY --dir internal ./
 	COPY --dir vendor ./
@@ -71,8 +73,17 @@ goreleaser:
 	RUN goreleaser $CMD
 	SAVE ARTIFACT dist dist
 
+ssl-certs:
+  RUN set -ex \
+    && apk add --no-cache ca-certificates
+  SAVE ARTIFACT /etc/ssl/certs/ca-certificates.crt ca-certificates.crt
+
 docker:
 	FROM scratch
 	ARG DOCKER_TAG
-	COPY +goreleaser/dist/glucose_exporter_linux_amd64_v1/glucose_exporter /bin/glucose_exporter
+  	COPY +ssl-certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+	COPY +goreleaser/dist/glucose_exporter_linux_amd64_v1/glucose_exporter /glucose_exporter
+	VOLUME /var/cache/glucose_exporter
+  	ENTRYPOINT ["/glucose_exporter"]
+	CMD ["serve"]
 	SAVE IMAGE --push ghcr.io/xsteadfastx/glucose_exporter:$DOCKER_TAG

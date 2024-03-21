@@ -1,6 +1,7 @@
 project_name: "glucose_exporter"
 builds:
-  - env:
+  - main: ./cmd/glucose_exporter/
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -10,9 +11,9 @@ builds:
       - "-s"
       - "-w"
       - "-extldflags '-static'"
-      - "-X git.wobcom.de/smartmetering/kerouac/cmd.version={{.Version}}"
-      - "-X git.wobcom.de/smartmetering/kerouac/cmd.commit={{.ShortCommit}}"
-      - "-X git.wobcom.de/smartmetering/kerouac/cmd.date={{.Date}}"
+      - "-X main.version={{.Version}}"
+      - "-X main.commit={{.ShortCommit}}"
+      - "-X main.date={{.Date}}"
 checksum:
   name_template: "checksums.txt"
 snapshot:
