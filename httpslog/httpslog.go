@@ -15,6 +15,7 @@ func Handler() func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			lw := mutil.WrapWriter(w)
+
 			defer func() {
 				// Logging.
 				slog.Info(

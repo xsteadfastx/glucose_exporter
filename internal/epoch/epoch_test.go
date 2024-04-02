@@ -32,10 +32,8 @@ func TestMarshal(t *testing.T) {
 
 	is := is.New(t)
 
-	for _, table := range tables {
-		tt := table
-
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tt := range tables {
+		t.Run(tt.name, func(_ *testing.T) {
 			b, err := tt.input.MarshalJSON()
 			if tt.err == nil {
 				is.Equal(b, tt.expected)
@@ -61,10 +59,8 @@ func TestUnmarshal(t *testing.T) {
 
 	is := is.New(t)
 
-	for _, table := range tables {
-		tt := table
-
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tt := range tables {
+		t.Run(tt.name, func(_ *testing.T) {
 			e := epoch.Epoch{}
 
 			err := e.UnmarshalJSON(tt.input)

@@ -79,8 +79,6 @@ func TestSave(t *testing.T) {
 	is := is.New(t)
 
 	for _, tt := range tables {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			d := t.TempDir()
 
