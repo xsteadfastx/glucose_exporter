@@ -3,6 +3,7 @@ package config
 import (
 	"encoding"
 	"fmt"
+	"log/slog"
 	"os"
 )
 
@@ -22,10 +23,14 @@ func (c *Config) GetPassword() (string, error) {
 	}
 
 	if c.Password != "" {
+		slog.Debug("read password in config")
+
 		return c.Password, nil
 	}
 
 	if c.PasswordFile != "" {
+		slog.Debug("read password file in config")
+
 		return string(c.PasswordFile), nil
 	}
 
