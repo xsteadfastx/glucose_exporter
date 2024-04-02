@@ -26,7 +26,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	vm.WritePrometheus(w, false)
 }
 
-//nolint:funlen
 func glucose(ctx context.Context, w io.Writer) error {
 	c, err := cache.Load()
 	if err != nil {
@@ -37,22 +36,8 @@ func glucose(ctx context.Context, w io.Writer) error {
 	if c.JWT == "" || time.Now().After(time.Time(c.Expires)) {
 		slog.Debug("needs a fresh token")
 
-		token, err := api.Login(
-			ctx,
-			api.BaseURL,
-			config.Cfg.Email,
-			config.Cfg.Password,
-		)
-		if err != nil {
-			return fmt.Errorf("login: %w", err)
-		}
-
-		slog.Debug("got token", "token", token)
-
-		if err := cache.Save(
-			cache.Cache{JWT: token.Data.AuthTicket.Token, Expires: token.Data.AuthTicket.Expires},
-		); err != nil {
-			return fmt.Errorf("saving cache: %w", err)
+		if err := token(ctx); err != nil {
+			return fmt.Errorf("refreshing token: %w", err)
 		}
 	}
 
@@ -98,6 +83,33 @@ func glucose(ctx context.Context, w io.Writer) error {
 		fmt.Sprintf("trend_arrow{%s}", labels),
 		uint64(resp.Data[0].GlucoseMeasurement.TrendArrow),
 	)
+
+	return nil
+}
+
+func token(ctx context.Context) error {
+	pass, err := config.Cfg.GetPassword()
+	if err != nil {
+		return fmt.Errorf("getting password from config: %w", err)
+	}
+
+	token, err := api.Login(
+		ctx,
+		api.BaseURL,
+		config.Cfg.Email,
+		pass,
+	)
+	if err != nil {
+		return fmt.Errorf("login: %w", err)
+	}
+
+	slog.Debug("got token", "token", token)
+
+	if err := cache.Save(
+		cache.Cache{JWT: token.Data.AuthTicket.Token, Expires: token.Data.AuthTicket.Expires},
+	); err != nil {
+		return fmt.Errorf("saving cache: %w", err)
+	}
 
 	return nil
 }
