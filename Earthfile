@@ -74,16 +74,16 @@ goreleaser:
 	SAVE ARTIFACT dist dist
 
 ssl-certs:
-  RUN set -ex \
-    && apk add --no-cache ca-certificates
-  SAVE ARTIFACT /etc/ssl/certs/ca-certificates.crt ca-certificates.crt
+	RUN set -ex \
+		&& apk add --no-cache ca-certificates
+	SAVE ARTIFACT /etc/ssl/certs/ca-certificates.crt ca-certificates.crt
 
 docker:
 	FROM scratch
 	ARG DOCKER_TAG
-  	COPY +ssl-certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+	COPY +ssl-certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 	COPY +goreleaser/dist/glucose_exporter_linux_amd64_v1/glucose_exporter /glucose_exporter
 	VOLUME /var/cache/glucose_exporter
-  	ENTRYPOINT ["/glucose_exporter"]
+	ENTRYPOINT ["/glucose_exporter"]
 	CMD ["serve"]
 	SAVE IMAGE --push ghcr.io/xsteadfastx/glucose_exporter:$DOCKER_TAG
