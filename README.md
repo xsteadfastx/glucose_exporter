@@ -31,6 +31,23 @@ The easiest way to install and running the exporter is through docker. Please ch
 | `CACHE_DIR`          | Where to store cache data. Defaults to `/var/cache/glucose_exporter`                         |
 | `DEBUG`              | Enabling debug logging                                                                       |
 
+## Exported metrics
+
+| Metrics              | Description                              |
+| -------------------- | ---------------------------------------- |
+| `value_in_mg_per_dl` | The glucose level itself                 |
+| `trend_arrow`        | A integer representing the glucose trend |
+
+### Trend interpretation
+
+| Trend | Meaning |
+| ----- | ------- |
+| 1     | ⬇️      |
+| 2     | ↘️      |
+| 3     | ➡️      |
+| 4     | ↗️      |
+| 5     | ⬆️      |
+
 ## Thanks
 
 - https://github.com/FokkeZB/libreview-unofficial
