@@ -48,7 +48,7 @@ func glucose(ctx context.Context, w io.Writer) error {
 	}
 
 	// Getting connections, which includes the glucose data.
-	resp, err := api.Connections(ctx, api.BaseURL, c.JWT)
+	resp, err := api.Connections(ctx, api.BaseURL, c.JWT, c.AccountID)
 	if err != nil {
 		return fmt.Errorf("connections: %w", err)
 	}
@@ -106,7 +106,7 @@ func token(ctx context.Context) error {
 	slog.Debug("got token", "token", token)
 
 	if err := cache.Save(
-		cache.Cache{JWT: token.Data.AuthTicket.Token, Expires: token.Data.AuthTicket.Expires},
+		cache.Cache{JWT: token.Data.AuthTicket.Token, Expires: token.Data.AuthTicket.Expires, AccountID: token.Data.User.ID},
 	); err != nil {
 		return fmt.Errorf("saving cache: %w", err)
 	}

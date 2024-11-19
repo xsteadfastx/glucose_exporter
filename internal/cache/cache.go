@@ -15,9 +15,10 @@ import (
 const cacheFile = "cache.json"
 
 type Cache struct {
-	JWT     string      `json:"jwt,omitempty"`
-	Expires epoch.Epoch `json:"expires,omitempty"`
-	BaseURL string      `json:"base_url,omitempty"`
+	JWT       string      `json:"jwt,omitempty"`
+	Expires   epoch.Epoch `json:"expires,omitempty"`
+	BaseURL   string      `json:"base_url,omitempty"`
+	AccountID string      `json:"account_id,omitempty"`
 }
 
 func FullPath() string {

@@ -3,6 +3,8 @@ package api
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,7 +28,7 @@ func request(
 	ctx context.Context,
 	method string,
 	url string,
-	token string,
+	token, accountID string,
 	data []byte,
 ) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, bytes.NewReader(data))
@@ -34,14 +36,22 @@ func request(
 		return &http.Response{}, fmt.Errorf("creating request: %w", err)
 	}
 
-	req.Header.Add("cache-control", "no-cache")
-	req.Header.Add("connection", "Keep-Alive")
-	req.Header.Add("content-type", "application/json")
-	req.Header.Add("product", "llu.android")
-	req.Header.Add("version", "4.7")
+	req.Header.Add("Cache-Control", "no-cache")
+	req.Header.Add("Connection", "Keep-Alive")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Product", "llu.android")
+	req.Header.Add("Version", "4.12.0")
 
 	if token != "" {
-		req.Header.Add("authorization", "Bearer "+token)
+		req.Header.Add("Authorization", "Bearer "+token)
+	}
+
+	if accountID != "" {
+		h := sha256.New()
+
+		h.Write([]byte(accountID))
+
+		req.Header.Add("Account-Id", hex.EncodeToString(h.Sum(nil)))
 	}
 
 	resp, err := client.Do(req.WithContext(ctx))
@@ -57,9 +67,14 @@ type Ticket struct {
 	Expires epoch.Epoch `json:"expires"`
 }
 
+type User struct {
+	ID string `json:"id"`
+}
+
 type LoginResponse struct {
 	Data struct {
 		AuthTicket Ticket `json:"authTicket"`
+		User       User   `json:"user"`
 	} `json:"data"`
 }
 
@@ -79,7 +94,7 @@ func Login(ctx context.Context, baseURL, username, password string) (LoginRespon
 		return LoginResponse{}, fmt.Errorf("joining url: %w", err)
 	}
 
-	resp, err := request(ctx, http.MethodPost, url, "", d)
+	resp, err := request(ctx, http.MethodPost, url, "", "", d)
 	if err != nil {
 		return LoginResponse{}, fmt.Errorf("doing request: %w", err)
 	}
@@ -116,13 +131,16 @@ type ConnectionsResponse struct {
 	Ticket Ticket `json:"ticket"`
 }
 
-func Connections(ctx context.Context, baseURL, token string) (ConnectionsResponse, error) {
+func Connections(
+	ctx context.Context,
+	baseURL, token, accountID string,
+) (ConnectionsResponse, error) {
 	url, err := url.JoinPath(baseURL, "/connections")
 	if err != nil {
 		return ConnectionsResponse{}, fmt.Errorf("joining url: %w", err)
 	}
 
-	resp, err := request(ctx, http.MethodGet, url, token, []byte{})
+	resp, err := request(ctx, http.MethodGet, url, token, accountID, []byte{})
 	if err != nil {
 		return ConnectionsResponse{}, fmt.Errorf("doing request: %w", err)
 	}
